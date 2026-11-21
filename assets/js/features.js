@@ -1,6 +1,82 @@
 (function () {
   const CART_STORAGE_KEY = 'perpustakaan_cart_v1';
+  const USER_STORAGE_KEY = 'perpustakaan_user_v1';
   const MAX_CART_ITEMS = 3;
+  const ITEMS_PER_PAGE = 6; // Ubah jumlah buku per halaman sesuai kebutuhan
+
+  let currentPage = 1;
+
+  // --- MANAJEMEN USER ---
+  function getCurrentUser() {
+    try {
+      const raw = localStorage.getItem(USER_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function logoutUser() {
+    localStorage.removeItem(USER_STORAGE_KEY);
+    updateAuthUI();
+    syncCheckoutPayload();
+    alert('Anda telah keluar dari akun.');
+    if (window.App?.navigate) {
+      window.App.navigate('login.html');
+    } else {
+      window.location.href = 'login.html';
+    }
+  }
+
+  function updateAuthUI() {
+    const user = getCurrentUser();
+    const navList = document.querySelector('.main-nav__list');
+    if (!navList) return;
+
+    const authLink = navList.querySelector('a[href="login.html"]');
+    const existingStatus = document.getElementById('nav-user-status');
+
+    if (user) {
+      if (authLink && authLink.parentElement) {
+        authLink.parentElement.hidden = true;
+      }
+
+      let statusItem = existingStatus;
+      if (!statusItem) {
+        statusItem = document.createElement('li');
+        statusItem.id = 'nav-user-status';
+        statusItem.style.cssText = 'display:flex;align-items:center;gap:0.5rem;';
+        navList.append(statusItem);
+      }
+
+      const memberBadge = user.member_type ? ` (${user.member_type})` : '';
+      statusItem.innerHTML = `
+        <span class="main-nav__link" style="font-weight:600;">Halo, ${user.name}${memberBadge}</span>
+        <button type="button" id="btn-logout" class="btn btn--ghost" style="padding:0.25rem 0.6rem;font-size:0.85rem;">Keluar</button>
+      `;
+
+      statusItem.querySelector('#btn-logout')?.addEventListener('click', logoutUser);
+
+      const mainContainer = document.querySelector('main#konten-utama > .container, main#konten-utama');
+      let banner = document.getElementById('user-session-banner');
+      if (mainContainer && !banner) {
+        banner = document.createElement('div');
+        banner.id = 'user-session-banner';
+        banner.style.cssText =
+          'background:#ecfdf5;border:1px solid #10b981;color:#065f46;padding:0.65rem 1rem;border-radius:8px;margin:0.75rem auto;max-width:1120px;font-size:0.9rem;';
+        mainContainer.prepend(banner);
+      }
+      if (banner) {
+        banner.textContent = `Masuk sebagai ${user.name} (${user.email}) • Status Keanggotaan: ${user.member_type || 'Reguler'}`;
+      }
+    } else {
+      if (authLink && authLink.parentElement) {
+        authLink.parentElement.hidden = false;
+      }
+      if (existingStatus) existingStatus.remove();
+      document.getElementById('user-session-banner')?.remove();
+    }
+  }
 
   // --- MANAJEMEN KERANJANG (LOCALSTORAGE) ---
   function getCart() {
@@ -55,18 +131,16 @@
     const form = document.getElementById('form-transaksi');
     if (!form) return;
 
-    // Hapus input hidden lama agar tidak duplikat
     form.querySelectorAll('input[data-cart-hidden]').forEach((el) => el.remove());
 
     const cart = getCart();
-    cart.forEach((book) => {
-      const hiddenId = document.createElement('input');
-      hiddenId.type = 'hidden';
-      hiddenId.name = 'book_ids[]';
-      hiddenId.value = String(book.id);
-      hiddenId.dataset.cartHidden = 'true';
-      form.append(hiddenId);
-    });
+
+    const hiddenIds = document.createElement('input');
+    hiddenIds.type = 'hidden';
+    hiddenIds.name = 'book_ids';
+    hiddenIds.value = cart.map((book) => String(book.id)).join(',');
+    hiddenIds.dataset.cartHidden = 'true';
+    form.append(hiddenIds);
 
     const totalCost = cart.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
     const hiddenTotal = document.createElement('input');
@@ -75,6 +149,25 @@
     hiddenTotal.value = String(totalCost);
     hiddenTotal.dataset.cartHidden = 'true';
     form.append(hiddenTotal);
+
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      const userFields = {
+        user_id: currentUser.id || 'M-GUEST',
+        user_name: currentUser.name || 'Anggota',
+        user_email: currentUser.email || '',
+        member_type: currentUser.member_type || 'Reguler',
+      };
+
+      Object.entries(userFields).forEach(([key, val]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = String(val);
+        input.dataset.cartHidden = 'true';
+        form.append(input);
+      });
+    }
   }
 
   // --- RENDER HALAMAN KERANJANG (cart.html) ---
@@ -136,7 +229,6 @@
 
     if (!startDateInput || !dueDateOutput) return;
 
-    // Set default minimal hari ini
     const today = new Date().toISOString().split('T')[0];
     startDateInput.min = today;
 
@@ -168,32 +260,97 @@
     updateDueDate();
   }
 
-  // --- PENCARIAN, FILTER KATEGORI & URUTKAN KATALOG ---
-  function applyCatalogFilter() {
+  // --- PAGINATION + FILTER + SORTING KATALOG ---
+  function renderPaginationControls(totalItems, totalPages) {
+    const nav = document.querySelector('#pagination-katalog, .pagination');
+    if (!nav) return;
+
+    let list = nav.querySelector('.pagination__list');
+    if (!list) {
+      list = document.createElement('ul');
+      list.className = 'pagination__list';
+      nav.append(list);
+    }
+
+    // Sembunyikan pagination jika hasil kosong atau hanya 1 halaman
+    if (totalItems === 0 || totalPages <= 1) {
+      list.replaceChildren();
+      nav.hidden = true;
+      return;
+    }
+
+    nav.hidden = false;
+    const fragment = document.createDocumentFragment();
+
+    const createPageItem = (label, page, { disabled = false, active = false, ariaLabel = '' } = {}) => {
+      const li = document.createElement('li');
+      const link = document.createElement('a');
+      link.className = 'pagination__link';
+      link.href = `#katalog-page-${page}`;
+      link.textContent = label;
+      link.dataset.page = String(page);
+
+      if (ariaLabel) link.setAttribute('aria-label', ariaLabel);
+
+      if (active) {
+        link.classList.add('is-active', 'pagination__link--active');
+        link.setAttribute('aria-current', 'page');
+      }
+
+      if (disabled) {
+        link.classList.add('is-disabled', 'pagination__link--disabled');
+        link.setAttribute('aria-disabled', 'true');
+        link.tabIndex = -1;
+        link.style.pointerEvents = 'none';
+        link.style.opacity = '0.5';
+      }
+
+      li.append(link);
+      return li;
+    };
+
+    // Tombol Sebelumnya
+    fragment.append(
+      createPageItem('Sebelumnya', Math.max(1, currentPage - 1), {
+        disabled: currentPage <= 1,
+        ariaLabel: 'Halaman sebelumnya',
+      }),
+    );
+
+    // Tombol Nomor Halaman
+    for (let page = 1; page <= totalPages; page++) {
+      fragment.append(
+        createPageItem(String(page), page, {
+          active: page === currentPage,
+          ariaLabel: `Halaman ${page}`,
+        }),
+      );
+    }
+
+    // Tombol Berikutnya
+    fragment.append(
+      createPageItem('Berikutnya', Math.min(totalPages, currentPage + 1), {
+        disabled: currentPage >= totalPages,
+        ariaLabel: 'Halaman berikutnya',
+      }),
+    );
+
+    list.replaceChildren(fragment);
+  }
+
+  function applyCatalogFilter(resetPage = false) {
     const grid = document.getElementById('daftar-buku');
     if (!grid) return;
+
+    if (resetPage) currentPage = 1;
 
     const query = (document.getElementById('cari-buku')?.value || '').trim().toLowerCase();
     const selectedCategory = (document.getElementById('filter-kategori')?.value || '').trim().toLowerCase();
     const sortBy = document.getElementById('urutkan')?.value || 'terbaru';
 
     const cards = Array.from(grid.querySelectorAll('.book-card'));
-    let visibleCount = 0;
 
-    cards.forEach((card) => {
-      const title = (card.querySelector('.book-card__title')?.textContent || '').toLowerCase();
-      const author = (card.querySelector('.book-card__author')?.textContent || '').toLowerCase();
-      const category = (card.dataset.kategori || '').toLowerCase();
-
-      const matchQuery = !query || title.includes(query) || author.includes(query);
-      const matchCategory = !selectedCategory || category === selectedCategory;
-      const isVisible = matchQuery && matchCategory;
-
-      card.hidden = !isVisible;
-      if (isVisible) visibleCount++;
-    });
-
-    // Pengurutan kartu
+    // 1. Urutkan kartu terlebih dahulu
     const sortedCards = [...cards].sort((a, b) => {
       if (sortBy === 'judul') {
         const titleA = a.querySelector('.book-card__title')?.textContent || '';
@@ -210,8 +367,43 @@
 
     sortedCards.forEach((card) => grid.append(card));
 
+    // 2. Saring buku yang sesuai pencarian & kategori
+    const matchedCards = sortedCards.filter((card) => {
+      const title = (card.querySelector('.book-card__title')?.textContent || '').toLowerCase();
+      const author = (card.querySelector('.book-card__author')?.textContent || '').toLowerCase();
+      const category = (card.dataset.kategori || '').toLowerCase();
+
+      const matchQuery = !query || title.includes(query) || author.includes(query);
+      const matchCategory = !selectedCategory || category === selectedCategory;
+      return matchQuery && matchCategory;
+    });
+
+    // 3. Hitung rentang pagination
+    const totalMatched = matchedCards.length;
+    const totalPages = Math.max(1, Math.ceil(totalMatched / ITEMS_PER_PAGE));
+
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const visibleSet = new Set(matchedCards.slice(startIndex, endIndex));
+
+    // 4. Tampilkan hanya buku pada halaman aktif
+    sortedCards.forEach((card) => {
+      card.hidden = !visibleSet.has(card);
+    });
+
+    // 5. Perbarui informasi jumlah buku & render tombol pagination
     const countEl = document.getElementById('jumlah-buku');
-    if (countEl) countEl.textContent = String(visibleCount);
+    if (countEl) {
+      countEl.textContent =
+        totalMatched > visibleSet.size
+          ? `${visibleSet.size} dari ${totalMatched}`
+          : String(totalMatched);
+    }
+
+    renderPaginationControls(totalMatched, totalPages);
   }
 
   function initCatalogFilter() {
@@ -221,12 +413,12 @@
 
       filterForm.addEventListener('submit', (event) => {
         event.preventDefault();
-        applyCatalogFilter();
+        applyCatalogFilter(true);
       });
 
-      document.getElementById('cari-buku')?.addEventListener('input', applyCatalogFilter);
-      document.getElementById('filter-kategori')?.addEventListener('change', applyCatalogFilter);
-      document.getElementById('urutkan')?.addEventListener('change', applyCatalogFilter);
+      document.getElementById('cari-buku')?.addEventListener('input', () => applyCatalogFilter(true));
+      document.getElementById('filter-kategori')?.addEventListener('change', () => applyCatalogFilter(true));
+      document.getElementById('urutkan')?.addEventListener('change', () => applyCatalogFilter(true));
     }
 
     // Klik kategori pada sidebar
@@ -239,11 +431,14 @@
         const select = document.getElementById('filter-kategori');
         if (select) {
           select.value = link.dataset.kategori || '';
-          applyCatalogFilter();
+          applyCatalogFilter(true);
           document.getElementById('katalog')?.scrollIntoView({ behavior: 'smooth' });
         }
       });
     });
+
+    // Terapkan pagination jika kartu buku sudah ada di DOM
+    applyCatalogFilter(false);
   }
 
   // --- MODAL DETAIL BUKU ---
@@ -285,7 +480,61 @@
     dialog.showModal();
   }
 
-  // --- EVENT DELEGATION GLOBAL (PINJAM, HAPUS, DETAIL, RESET CART SAAT CHECKOUT) ---
+  // --- RENDER RIWAYAT PEMINJAMAN DARI BACKEND ---
+  function formatIndoDate(dateStr) {
+    if (!dateStr || dateStr === '-') return '-';
+    const parsed = new Date(`${dateStr}T00:00:00`);
+    if (Number.isNaN(parsed.getTime())) return dateStr;
+    return parsed.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  async function renderTransactionHistory() {
+    const tbody = document.getElementById('isi-riwayat');
+    if (!tbody || !window.App?.apiRequest) return;
+
+    const currentUser = getCurrentUser();
+    const endpoint = currentUser?.email
+      ? `get_transactions.php?email=${encodeURIComponent(currentUser.email)}`
+      : 'get_transactions.php';
+
+    try {
+      const response = await window.App.apiRequest(endpoint, { method: 'GET' });
+      const items = Array.isArray(response?.data) ? response.data : [];
+
+      if (items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align:center;color:#666;">Belum ada riwayat peminjaman.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = items
+        .map((item) => {
+          const isDone = item.status === 'Selesai' || item.status === 'Dikembalikan';
+          const statusClass = isDone ? 'status--done' : 'status--active';
+
+          return `
+            <tr>
+              <td>${item.title}</td>
+              <td><time datetime="${item.tanggal_pinjam}">${formatIndoDate(item.tanggal_pinjam)}</time></td>
+              <td><time datetime="${item.tanggal_kembali}">${formatIndoDate(item.tanggal_kembali)}</time></td>
+              <td><span class="status ${statusClass}">${item.status}</span></td>
+            </tr>
+          `;
+        })
+        .join('');
+    } catch {
+      // Biarkan tampilan apa adanya jika backend gagal dihubungi
+    }
+  }
+
+  // --- EVENT DELEGATION GLOBAL ---
   function bindGlobalEvents() {
     if (document.body.dataset.featuresBound === 'true') return;
     document.body.dataset.featuresBound = 'true';
@@ -294,7 +543,27 @@
       const target = event.target instanceof Element ? event.target : null;
       if (!target) return;
 
-      // 1. Klik tombol "Pinjam" pada katalog
+      // 1. Klik tombol Pagination
+      const pageLink = target.closest('.pagination__link');
+      if (pageLink) {
+        event.preventDefault();
+        if (
+          pageLink.getAttribute('aria-disabled') === 'true' ||
+          pageLink.classList.contains('is-disabled')
+        ) {
+          return;
+        }
+
+        const nextPage = Number(pageLink.dataset.page);
+        if (Number.isInteger(nextPage) && nextPage >= 1) {
+          currentPage = nextPage;
+          applyCatalogFilter(false);
+          document.getElementById('katalog')?.scrollIntoView({ behavior: 'smooth' });
+        }
+        return;
+      }
+
+      // 2. Klik tombol "Pinjam" pada katalog
       const borrowBtn = target.closest('button[data-aksi="pinjam"]');
       if (borrowBtn) {
         const card = borrowBtn.closest('.book-card');
@@ -311,7 +580,7 @@
         return;
       }
 
-      // 2. Klik tombol "Hapus" pada halaman keranjang
+      // 3. Klik tombol "Hapus" pada halaman keranjang
       const removeBtn = target.closest('button[data-aksi="hapus"]');
       if (removeBtn) {
         const item = removeBtn.closest('.cart-item');
@@ -319,7 +588,7 @@
         return;
       }
 
-      // 3. Klik tombol "Detail" pada kartu buku
+      // 4. Klik tombol "Detail" pada kartu buku
       const detailLink = target.closest('.book-card__footer a[href^="#detail-"]');
       if (detailLink) {
         event.preventDefault();
@@ -328,22 +597,35 @@
       }
     });
 
-    // Kosongkan keranjang otomatis setelah form transaksi di-reset oleh cart.js saat sukses
+    // Kosongkan keranjang otomatis setelah form transaksi sukses
     document.addEventListener('reset', (event) => {
       if (event.target instanceof HTMLFormElement && event.target.id === 'form-transaksi') {
         saveCart([]);
         renderCartPage();
+        renderTransactionHistory();
       }
     });
   }
 
   function initFeatures() {
     bindGlobalEvents();
+    updateAuthUI();
     updateCartBadge();
     initCatalogFilter();
     renderCartPage();
     initDateCalculator();
+    renderTransactionHistory();
   }
+
+  document.addEventListener('catalog:loaded', () => {
+    currentPage = 1;
+    applyCatalogFilter(true);
+  });
+
+  document.addEventListener('app:auth-changed', () => {
+    updateAuthUI();
+    syncCheckoutPayload();
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initFeatures, { once: true });
@@ -351,5 +633,8 @@
     initFeatures();
   }
 
-  document.addEventListener('app:navigated', initFeatures);
+  document.addEventListener('app:navigated', () => {
+    currentPage = 1;
+    initFeatures();
+  });
 })();

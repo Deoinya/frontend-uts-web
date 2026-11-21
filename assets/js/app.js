@@ -3,7 +3,7 @@
   const ROUTER_VIEW_SELECTOR = 'main#konten-utama, [data-router-view]';
   const API_BASE = (
     document.querySelector('meta[name="api-base"]')?.content ||
-    'http://localhost/backend-web-uts/api'
+    'http://localhost:8000/api'
   ).replace(/\/+$/, '');
 
   let routerInitialized = false;

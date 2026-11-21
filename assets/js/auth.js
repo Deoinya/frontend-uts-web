@@ -1,4 +1,15 @@
 (function () {
+  const USER_STORAGE_KEY = 'perpustakaan_user_v1';
+
+  function saveUserSession(userData, fallbackEmail = '') {
+    const user = userData && typeof userData === 'object'
+      ? userData
+      : { name: fallbackEmail.split('@')[0] || 'Anggota', email: fallbackEmail, member_type: 'Reguler' };
+
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    document.dispatchEvent(new CustomEvent('app:auth-changed', { detail: user }));
+  }
+
   function bindLoginForm(form) {
     if (form.dataset.authBound === 'true') return;
     form.dataset.authBound = 'true';
@@ -14,10 +25,13 @@
       window.App.setSubmitting(form, true);
 
       try {
+        const payload = window.App.formToPayload(form);
         const response = await window.App.apiRequest('login.php', {
           method: 'POST',
-          body: window.App.formToPayload(form),
+          body: payload,
         });
+
+        saveUserSession(response?.data, payload.email);
 
         window.App.setFormMessage(
           form,
@@ -58,10 +72,20 @@
       window.App.setSubmitting(form, true);
 
       try {
+        const payload = window.App.formToPayload(form);
         const response = await window.App.apiRequest('register.php', {
           method: 'POST',
-          body: window.App.formToPayload(form),
+          body: payload,
         });
+
+        saveUserSession(
+          response?.data || {
+            name: payload.nama || payload.name || 'Anggota',
+            email: payload.email,
+            member_type: 'Reguler',
+          },
+          payload.email,
+        );
 
         window.App.setFormMessage(
           form,

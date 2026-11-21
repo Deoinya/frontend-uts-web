@@ -24,6 +24,12 @@
       image.width = 240;
       image.height = 320;
       image.loading = 'lazy';
+
+      image.onerror = function () {
+  this.onerror = null;
+  this.src = 'public/images/covers/buku-01.jpg'; // atau URL placeholder
+};
+
       cover.append(image);
     }
 
@@ -133,6 +139,9 @@
       container.replaceChildren(fragment);
       setBookCount(books.length);
       removeCatalogMessage();
+
+      // Beri tahu features.js bahwa katalog siap dipaginasi & difilter
+      document.dispatchEvent(new CustomEvent('catalog:loaded'));
     } catch (error) {
       if (container.querySelectorAll('.book-card').length === 0) {
         showCatalogMessage(

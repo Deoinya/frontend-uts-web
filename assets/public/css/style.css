@@ -596,3 +596,15 @@ input[type="date"]:focus {
   .cart-layout { grid-template-columns: minmax(0, 1fr) 340px; }
   .summary { position: sticky; top: 5rem; }
 }
+.pagination__link.is-active {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  font-weight: 600;
+}
+
+.pagination__link.is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}

@@ -19,7 +19,7 @@
     <div class="container site-header__inner">
 
       <a class="brand" href="index.html" aria-label="Perpustakaan Digital, ke beranda">
-        <img class="brand__logo" src="public/images/logo.svg" alt="" width="40" height="40">
+        <img class="brand__logo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><rect width='40' height='40' rx='8' fill='%232563eb'/><path d='M11 12h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2h-8V12zm18 0h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8V12z' fill='%23ffffff'/></svg>" alt="" width="40" height="40">
         <span class="brand__name">Perpustakaan Digital</span>
       </a>
 
@@ -40,19 +40,7 @@
 
     <!-- Hero / pengantar -->
     <section class="hero" id="hero" aria-labelledby="hero-judul">
-      <div class="container hero__inner">
-        <div class="hero__text">
-          <h1 id="hero-judul">Pinjam e-book kapan saja, di mana saja</h1>
-          <p class="hero__lead">
-            Jelajahi koleksi buku digital kami, pilih yang kamu butuhkan,
-            lalu pinjam langsung dari perangkatmu.
-          </p>
-          <a class="btn btn--primary" href="#katalog">Lihat katalog</a>
-        </div>
-        <figure class="hero__figure">
-          <img src="public/images/hero.jpg" alt="Tumpukan buku dan perangkat baca digital di atas meja" width="560" height="420">
-        </figure>
-      </div>
+
     </section>
 
     <div class="container layout">
@@ -97,125 +85,11 @@
         <!-- Daftar buku -->
         <div class="book-grid" id="daftar-buku">
 
-          <article class="book-card" data-id="1" data-kategori="teknologi">
-            <figure class="book-card__cover">
-              <img src="public/images/covers/buku-01.jpg" alt="Sampul buku Dasar Pemrograman Web" width="240" height="320" loading="lazy">
-            </figure>
-            <div class="book-card__body">
-              <h3 class="book-card__title">Dasar Pemrograman Web</h3>
-              <p class="book-card__author">Rina Setiawati</p>
-              <p class="book-card__meta">
-                <span class="tag">Teknologi</span>
-                <span class="book-card__status book-card__status--available">Tersedia</span>
-              </p>
-            </div>
-            <footer class="book-card__footer">
-              <button class="btn btn--primary" type="button" data-aksi="pinjam">Pinjam</button>
-              <a class="btn btn--ghost" href="#detail-1">Detail</a>
-            </footer>
-          </article>
-
-          <article class="book-card" data-id="2" data-kategori="teknologi">
-            <figure class="book-card__cover">
-              <img src="public/images/covers/buku-02.jpg" alt="Sampul buku Pemrograman Berorientasi Objek dengan PHP" width="240" height="320" loading="lazy">
-            </figure>
-            <div class="book-card__body">
-              <h3 class="book-card__title">Pemrograman Berorientasi Objek dengan PHP</h3>
-              <p class="book-card__author">Bagas Pratama</p>
-              <p class="book-card__meta">
-                <span class="tag">Teknologi</span>
-                <span class="book-card__status book-card__status--available">Tersedia</span>
-              </p>
-            </div>
-            <footer class="book-card__footer">
-              <button class="btn btn--primary" type="button" data-aksi="pinjam">Pinjam</button>
-              <a class="btn btn--ghost" href="#detail-2">Detail</a>
-            </footer>
-          </article>
-
-          <article class="book-card" data-id="3" data-kategori="sains">
-            <figure class="book-card__cover">
-              <img src="public/images/covers/buku-03.jpg" alt="Sampul buku Jejak Bintang di Langit Nusantara" width="240" height="320" loading="lazy">
-            </figure>
-            <div class="book-card__body">
-              <h3 class="book-card__title">Jejak Bintang di Langit Nusantara</h3>
-              <p class="book-card__author">Dewi Anggraini</p>
-              <p class="book-card__meta">
-                <span class="tag">Sains</span>
-                <span class="book-card__status book-card__status--borrowed">Sedang dipinjam</span>
-              </p>
-            </div>
-            <footer class="book-card__footer">
-              <button class="btn btn--primary" type="button" data-aksi="pinjam" disabled>Pinjam</button>
-              <a class="btn btn--ghost" href="#detail-3">Detail</a>
-            </footer>
-          </article>
-
-          <article class="book-card" data-id="4" data-kategori="fiksi">
-            <figure class="book-card__cover">
-              <img src="public/images/covers/buku-04.jpg" alt="Sampul novel Surat dari Kota Hujan" width="240" height="320" loading="lazy">
-            </figure>
-            <div class="book-card__body">
-              <h3 class="book-card__title">Surat dari Kota Hujan</h3>
-              <p class="book-card__author">Maya Kusuma</p>
-              <p class="book-card__meta">
-                <span class="tag">Fiksi</span>
-                <span class="book-card__status book-card__status--available">Tersedia</span>
-              </p>
-            </div>
-            <footer class="book-card__footer">
-              <button class="btn btn--primary" type="button" data-aksi="pinjam">Pinjam</button>
-              <a class="btn btn--ghost" href="#detail-4">Detail</a>
-            </footer>
-          </article>
-
-          <article class="book-card" data-id="5" data-kategori="bisnis">
-            <figure class="book-card__cover">
-              <img src="public/images/covers/buku-05.jpg" alt="Sampul buku Merintis Usaha dari Nol" width="240" height="320" loading="lazy">
-            </figure>
-            <div class="book-card__body">
-              <h3 class="book-card__title">Merintis Usaha dari Nol</h3>
-              <p class="book-card__author">Hendra Wijaya</p>
-              <p class="book-card__meta">
-                <span class="tag">Bisnis</span>
-                <span class="book-card__status book-card__status--available">Tersedia</span>
-              </p>
-            </div>
-            <footer class="book-card__footer">
-              <button class="btn btn--primary" type="button" data-aksi="pinjam">Pinjam</button>
-              <a class="btn btn--ghost" href="#detail-5">Detail</a>
-            </footer>
-          </article>
-
-          <article class="book-card" data-id="6" data-kategori="teknologi">
-            <figure class="book-card__cover">
-              <img src="public/images/covers/buku-06.jpg" alt="Sampul buku Git dan Kolaborasi Tim" width="240" height="320" loading="lazy">
-            </figure>
-            <div class="book-card__body">
-              <h3 class="book-card__title">Git dan Kolaborasi Tim</h3>
-              <p class="book-card__author">Fajar Nugroho</p>
-              <p class="book-card__meta">
-                <span class="tag">Teknologi</span>
-                <span class="book-card__status book-card__status--available">Tersedia</span>
-              </p>
-            </div>
-            <footer class="book-card__footer">
-              <button class="btn btn--primary" type="button" data-aksi="pinjam">Pinjam</button>
-              <a class="btn btn--ghost" href="#detail-6">Detail</a>
-            </footer>
-          </article>
-
         </div>
 
         <!-- Paginasi -->
-        <nav class="pagination" aria-label="Halaman katalog">
-          <ul class="pagination__list">
-            <li><a class="pagination__link" href="#" aria-label="Halaman sebelumnya">Sebelumnya</a></li>
-            <li><a class="pagination__link" href="#" aria-current="page">1</a></li>
-            <li><a class="pagination__link" href="#">2</a></li>
-            <li><a class="pagination__link" href="#">3</a></li>
-            <li><a class="pagination__link" href="#" aria-label="Halaman berikutnya">Berikutnya</a></li>
-          </ul>
+        <nav class="pagination" id="pagination-katalog" aria-label="Halaman katalog">
+          <ul class="pagination__list"></ul>
         </nav>
       </section>
 
