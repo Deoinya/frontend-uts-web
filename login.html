@@ -50,7 +50,7 @@
         <section class="auth-panel" id="panel-login" aria-labelledby="judul-login">
           <h2 id="judul-login">Masuk</h2>
 
-          <form class="form" id="form-login" action="#" method="post" novalidate>
+          <form class="form" id="form-login" data-redirect="index.html" action="#" method="post" novalidate>
             <p class="form__error" id="login-error" role="alert" hidden></p>
 
             <div class="form__group">
@@ -82,7 +82,7 @@
         <section class="auth-panel" id="panel-register" aria-labelledby="judul-register">
           <h2 id="judul-register">Daftar</h2>
 
-          <form class="form" id="form-register" action="#" method="post" novalidate>
+          <form class="form" id="form-register" data-redirect="index.html" action="#" method="post" novalidate>
             <p class="form__error" id="register-error" role="alert" hidden></p>
 
             <div class="form__group">
@@ -168,5 +168,11 @@
     </p>
   </footer>
 
+  <!-- ===================== SCRIPTS ===================== -->
+   <script src="assets/js/app.js"></script>
+  <script src="assets/js/book.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/features.js"></script>
 </body>
 </html>
