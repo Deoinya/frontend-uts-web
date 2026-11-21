@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tinjau e-book yang akan dipinjam dan konfirmasi transaksi peminjaman.">
+  <title>Keranjang Peminjaman | Perpustakaan Digital</title>
+
+  <!-- CSS utama -->
+  <link rel="stylesheet" href="assets/public/css/style.css">
+</head>
+<body class="page-cart">
+
+  <!-- Tautan lompat untuk pengguna keyboard / pembaca layar -->
+  <a class="skip-link" href="#konten-utama">Lewati ke konten utama</a>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header" id="site-header">
+    <div class="container site-header__inner">
+
+      <a class="brand" href="index.html" aria-label="Perpustakaan Digital, ke beranda">
+        <img class="brand__logo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><rect width='40' height='40' rx='8' fill='%232563eb'/><path d='M11 12h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2h-8V12zm18 0h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8V12z' fill='%23ffffff'/></svg>" alt="" width="40" height="40">
+        <span class="brand__name">Perpustakaan Digital</span>
+      </a>
+
+      <nav class="main-nav" id="main-nav" aria-label="Navigasi utama">
+        <ul class="main-nav__list">
+          <li><a class="main-nav__link" href="index.html">Beranda</a></li>
+          <li><a class="main-nav__link" href="index.html#katalog">Katalog</a></li>
+          <li><a class="main-nav__link" href="cart.html" aria-current="page">Keranjang <span class="badge" id="cart-count">2</span></a></li>
+          <li><a class="main-nav__link main-nav__link--cta" href="login.html">Masuk / Daftar</a></li>
+        </ul>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ===================== MAIN ===================== -->
+  <main id="konten-utama">
+    <div class="container">
+
+      <header class="page-title">
+        <h1>Keranjang Peminjaman</h1>
+        <p>Periksa e-book pilihanmu, lalu konfirmasi peminjaman.</p>
+      </header>
+
+      <div class="cart-layout">
+
+        <!-- Daftar buku di keranjang -->
+        <section class="cart" id="cart" aria-labelledby="judul-cart">
+          <h2 id="judul-cart">E-book yang akan dipinjam</h2>
+
+          <div class="cart-list" id="daftar-cart">
+
+          </div>
+
+          <!-- Keadaan kosong (ditampilkan oleh JavaScript bila keranjang kosong) -->
+          <div class="cart-empty" id="cart-empty" hidden>
+            <p>Keranjangmu masih kosong.</p>
+            <a class="btn btn--primary" href="index.html#katalog">Jelajahi katalog</a>
+          </div>
+        </section>
+
+        <!-- Ringkasan & konfirmasi transaksi -->
+        <aside class="summary" aria-labelledby="judul-ringkasan">
+          <h2 id="judul-ringkasan">Ringkasan peminjaman</h2>
+
+          <form class="form" id="form-transaksi" action="#" method="post" novalidate>
+            <dl class="summary__list">
+              <div class="summary__row">
+                <dt>Jumlah buku</dt>
+                <dd><output id="jumlah-item" name="jumlah">2</output> e-book</dd>
+              </div>
+              <div class="summary__row">
+                <dt>Masa pinjam</dt>
+                <dd>7 hari</dd>
+              </div>
+            </dl>
+
+            <div class="form__group">
+              <label for="tanggal-pinjam">Tanggal mulai pinjam</label>
+              <input type="date" id="tanggal-pinjam" name="tanggal_pinjam" required>
+              <p class="form__hint form__hint--error" id="tanggal-pinjam-error" hidden></p>
+            </div>
+
+            <p class="summary__due">
+              Batas pengembalian: <output id="tanggal-kembali" name="tanggal_kembali">-</output>
+            </p>
+
+            <div class="form__group form__group--inline">
+              <input type="checkbox" id="setuju-aturan" name="setuju" required>
+              <label for="setuju-aturan">Saya menyetujui aturan peminjaman</label>
+            </div>
+
+            <p class="form__error" id="transaksi-error" role="alert" hidden></p>
+
+            <button class="btn btn--primary btn--block" type="submit">Konfirmasi peminjaman</button>
+          </form>
+
+          <p class="summary__note">Maksimal 3 e-book per anggota.</p>
+        </aside>
+
+      </div>
+
+      <!-- Riwayat transaksi -->
+      <section class="history" id="riwayat" aria-labelledby="judul-riwayat">
+        <h2 id="judul-riwayat">Riwayat peminjaman</h2>
+        <div class="table-wrap">
+          <table class="table">
+            <caption class="visually-hidden">Daftar riwayat peminjaman e-book</caption>
+            <thead>
+              <tr>
+                <th scope="col">Judul</th>
+                <th scope="col">Tanggal pinjam</th>
+                <th scope="col">Batas kembali</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody id="isi-riwayat">
+              <tr>
+                <td>Git dan Kolaborasi Tim</td>
+                <td><time datetime="2026-11-01">1 Nov 2026</time></td>
+                <td><time datetime="2026-11-08">8 Nov 2026</time></td>
+                <td><span class="status status--done">Dikembalikan</span></td>
+              </tr>
+              <tr>
+                <td>Surat dari Kota Hujan</td>
+                <td><time datetime="2026-11-10">10 Nov 2026</time></td>
+                <td><time datetime="2026-11-17">17 Nov 2026</time></td>
+                <td><span class="status status--active">Sedang dipinjam</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer" id="site-footer">
+    <div class="container site-footer__inner">
+
+      <section class="site-footer__about" aria-labelledby="footer-tentang">
+        <h2 id="footer-tentang">Perpustakaan Digital</h2>
+        <p>Prototipe aplikasi peminjaman e-book untuk tugas pemrograman web.</p>
+      </section>
+
+      <nav class="site-footer__nav" aria-label="Navigasi footer">
+        <h2>Tautan</h2>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#katalog">Katalog</a></li>
+          <li><a href="cart.html">Keranjang</a></li>
+          <li><a href="login.html">Masuk / Daftar</a></li>
+        </ul>
+      </nav>
+
+      <address class="site-footer__contact">
+        <h2>Kontak</h2>
+        <p>Email: <a href="mailto:halo@perpustakaan-digital.test">halo@perpustakaan-digital.test</a></p>
+      </address>
+
+    </div>
+    <p class="site-footer__copy">
+      <small>&copy; 2026 Perpustakaan Digital. Semua hak dilindungi.</small>
+    </p>
+  </footer>
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/book.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/features.js"></script>
+</body>
+</html>

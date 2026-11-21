@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Katalog e-book digital. Cari, pilih, dan pinjam buku favoritmu secara online.">
+  <title>Katalog E-Book | Perpustakaan Digital</title>
+
+  <!-- CSS utama (dibuat pada tahap berikutnya) -->
+  <link rel="stylesheet" href="assets/public/css/style.css">
+</head>
+<body>
+
+  <!-- Tautan lompat untuk pengguna keyboard / pembaca layar -->
+  <a class="skip-link" href="#konten-utama">Lewati ke konten utama</a>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header" id="site-header">
+    <div class="container site-header__inner">
+
+      <a class="brand" href="index.html" aria-label="Perpustakaan Digital, ke beranda">
+        <img class="brand__logo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><rect width='40' height='40' rx='8' fill='%232563eb'/><path d='M11 12h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2h-8V12zm18 0h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8V12z' fill='%23ffffff'/></svg>" alt="" width="40" height="40">
+        <span class="brand__name">Perpustakaan Digital</span>
+      </a>
+
+      <nav class="main-nav" id="main-nav" aria-label="Navigasi utama">
+        <ul class="main-nav__list">
+          <li><a class="main-nav__link" href="index.html" aria-current="page">Beranda</a></li>
+          <li><a class="main-nav__link" href="index.html#katalog">Katalog</a></li>
+          <li><a class="main-nav__link" href="cart.html">Keranjang <span class="badge" id="cart-count">0</span></a></li>
+          <li><a class="main-nav__link main-nav__link--cta" href="login.html">Masuk / Daftar</a></li>
+        </ul>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ===================== MAIN ===================== -->
+  <main id="konten-utama">
+
+    <!-- Hero / pengantar -->
+    <section class="hero" id="hero" aria-labelledby="hero-judul">
+
+    </section>
+
+    <div class="container layout">
+
+      <!-- Katalog -->
+      <section class="catalog" id="katalog" aria-labelledby="katalog-judul">
+        <header class="section-header">
+          <h2 id="katalog-judul">Katalog E-Book</h2>
+          <p class="section-header__desc">Menampilkan <span id="jumlah-buku">6</span> buku</p>
+        </header>
+
+        <!-- Pencarian & filter (logika diisi Anggota C) -->
+        <form class="filter" id="form-filter" role="search" aria-label="Cari dan filter e-book" action="#" method="get">
+          <div class="filter__field filter__field--search">
+            <label for="cari-buku">Cari judul atau penulis</label>
+            <input type="search" id="cari-buku" name="q" placeholder="Contoh: pemrograman web">
+          </div>
+
+          <div class="filter__field">
+            <label for="filter-kategori">Kategori</label>
+            <select id="filter-kategori" name="kategori">
+              <option value="">Semua kategori</option>
+              <option value="teknologi">Teknologi</option>
+              <option value="sains">Sains</option>
+              <option value="fiksi">Fiksi</option>
+              <option value="bisnis">Bisnis</option>
+            </select>
+          </div>
+
+          <div class="filter__field">
+            <label for="urutkan">Urutkan</label>
+            <select id="urutkan" name="urutkan">
+              <option value="terbaru">Terbaru</option>
+              <option value="judul">Judul (A–Z)</option>
+              <option value="populer">Terpopuler</option>
+            </select>
+          </div>
+
+          <button class="btn btn--primary" type="submit">Terapkan</button>
+        </form>
+
+        <!-- Daftar buku -->
+        <div class="book-grid" id="daftar-buku">
+
+        </div>
+
+        <!-- Paginasi -->
+        <nav class="pagination" id="pagination-katalog" aria-label="Halaman katalog">
+          <ul class="pagination__list"></ul>
+        </nav>
+      </section>
+
+      <!-- Sidebar -->
+      <aside class="sidebar" aria-label="Informasi tambahan">
+
+        <section class="sidebar__block" aria-labelledby="aside-kategori">
+          <h2 id="aside-kategori">Kategori</h2>
+          <ul class="category-list">
+            <li><a href="#katalog" data-kategori="teknologi">Teknologi</a></li>
+            <li><a href="#katalog" data-kategori="sains">Sains</a></li>
+            <li><a href="#katalog" data-kategori="fiksi">Fiksi</a></li>
+            <li><a href="#katalog" data-kategori="bisnis">Bisnis</a></li>
+          </ul>
+        </section>
+
+        <section class="sidebar__block" aria-labelledby="aside-populer">
+          <h2 id="aside-populer">Paling sering dipinjam</h2>
+          <ol class="popular-list">
+            <li><a href="#detail-2">Pemrograman Berorientasi Objek dengan PHP</a></li>
+            <li><a href="#detail-1">Dasar Pemrograman Web</a></li>
+            <li><a href="#detail-4">Surat dari Kota Hujan</a></li>
+          </ol>
+        </section>
+
+        <section class="sidebar__block" aria-labelledby="aside-aturan">
+          <h2 id="aside-aturan">Aturan peminjaman</h2>
+          <p>Setiap anggota dapat meminjam maksimal 3 e-book dengan masa pinjam 7 hari.</p>
+        </section>
+
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer" id="site-footer">
+    <div class="container site-footer__inner">
+
+      <section class="site-footer__about" aria-labelledby="footer-tentang">
+        <h2 id="footer-tentang">Perpustakaan Digital</h2>
+        <p>Prototipe aplikasi peminjaman e-book untuk tugas pemrograman web.</p>
+      </section>
+
+      <nav class="site-footer__nav" aria-label="Navigasi footer">
+        <h2>Tautan</h2>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#katalog">Katalog</a></li>
+          <li><a href="cart.html">Keranjang</a></li>
+          <li><a href="login.html">Masuk / Daftar</a></li>
+        </ul>
+      </nav>
+
+      <address class="site-footer__contact">
+        <h2>Kontak</h2>
+        <p>Email: <a href="mailto:halo@perpustakaan-digital.test">halo@perpustakaan-digital.test</a></p>
+      </address>
+
+    </div>
+    <p class="site-footer__copy">
+      <small>&copy; 2026 Perpustakaan Digital. Semua hak dilindungi.</small>
+    </p>
+  </footer>
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/book.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/features.js"></script>
+</body>
+</html>
